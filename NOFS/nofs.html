@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 Days Smoke-Free</title>
+    <style>
+        /* Reset default margins and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f3f4f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: linear-gradient(135deg, #9be15d, #00e3ae);
+        }
+
+        /* Container Styles */
+        .container {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 900px;
+            padding: 40px 50px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* Header Styles */
+        h1 {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        /* Day Counter Styles */
+        .day-count {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        /* Checkbox Container */
+        .checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        /* Checkbox Item */
+        .checkbox-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .checkbox-container label {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-bottom: 5px;
+            border-radius: 50%;
+            border: 2px solid #4CAF50;
+            transition: all 0.3s ease;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: #4CAF50;
+            border-color: #388e3c;
+        }
+
+        /* Button Styles */
+        .reset-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 40px;
+            display: none; /* Initially hide the button */
+            transition: background-color 0.3s ease;
+        }
+
+        .reset-button:hover {
+            background-color: #388e3c;
+        }
+
+        /* Footer Styles */
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        /* Media Query for Mobile */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .checkbox-container {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .day-count {
+                font-size: 1rem;
+            }
+
+            .reset-button {
+                font-size: 0.9rem;
+                padding: 12px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>100 Days Smoke-Free Tracker</h1>
+
+        <div class="checkbox-container" id="checkboxContainer">
+            <!-- Checkboxes for each day will be added here dynamically -->
+        </div>
+
+        <div class="day-count">
+            <p><strong>Days Checked: <span id="checkedCount">0</span> / 100</strong></p>
+        </div>
+
+        <a href="#" class="reset-button" onclick="resetProgress()">Reset Tracker</a>
+
+        <div class="footer">
+            <p>Stay strong, you've got this!</p>
+        </div>
+    </div>
+
+    <script>
+        const totalDays = 100; // Total days to track
+        const checkboxContainer = document.getElementById('checkboxContainer');
+        const checkedCountElement = document.getElementById('checkedCount');
+        const resetButton = document.querySelector('.reset-button');
+        
+        // Function to generate checkboxes for 100 days
+        function generateCheckboxes() {
+            for (let i = 1; i <= totalDays; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('checkbox-item');
+                
+                // Create a checkbox for the day
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `day${i}`;
+                checkbox.addEventListener('change', updateCheckedCount);
+
+                // Check if the day is already checked in cookies
+                const checked = getCookie(`day${i}`) === 'true';
+                checkbox.checked = checked;
+
+                // Create a label for the checkbox
+                const label = document.createElement('label');
+                label.setAttribute('for', checkbox.id);
+                label.textContent = `Day ${i}`;
+
+                // Append checkbox and label to the day div
+                dayDiv.appendChild(checkbox);
+                dayDiv.appendChild(label);
+                
+                // Append the day div to the container
+                checkboxContainer.appendChild(dayDiv);
+            }
+        }
+
+        // Function to update the count of checked boxes and save to cookies
+        function updateCheckedCount() {
+            const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            checkedCountElement.textContent = checkedBoxes.length;
+
+            // Show or hide reset button based on progress
+            if (checkedBoxes.length > 0) {
+                resetButton.style.display = 'inline-block'; // Show button if at least one day is checked
+            } else {
+                resetButton.style.display = 'none'; // Hide button if no days are checked
+            }
+
+            // Save each checkbox state in cookies
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                setCookie(checkbox.id, checkbox.checked, 365); // Set cookie for 365 days
+            });
+        }
+
+        // Function to reset the progress
+        function resetProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                setCookie(checkbox.id, false, 365); // Save the reset state to cookies
+            });
+            updateCheckedCount();
+        }
+
+        // Function to get a cookie by name
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Function to set a cookie with a specific name, value, and expiration in days
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+            document.cookie = `${name}=${value};expires=${expires};path=/`;
+        }
+
+        // Initialize the checkboxes on page load
+        generateCheckboxes();
+    </script>
+
+</body>
+</html>
